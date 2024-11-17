@@ -2,89 +2,110 @@ import java.util.Scanner;
 
 public class App {
 
+    private static final byte TOTAL_CELLS = 9;
+    private static final char EMPTY_CELL = ' ';
+    private static final char USER_MARK = 'X';
+    private static final char COMPUTER_MARK = 'O';
+
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
-        byte input;
-        byte rand;
-        byte i;
-        boolean boxAvailable = false;
+        byte userMove;
+        byte computerMove;
         byte winner = 0;
-        char box[] = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+        char[] board = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
         System.out.println("Enter box number to select. Enjoy!\n");
 
-        boolean boxEmpty = false;
         while (true) {
-            System.out.println("\n\n " + box[0] + " | " + box[1] + " | " + box[2] + " ");
-            System.out.println("-----------");
-            System.out.println(" " + box[3] + " | " + box[4] + " | " + box[5] + " ");
-            System.out.println("-----------");
-            System.out.println(" " + box[6] + " | " + box[7] + " | " + box[8] + " \n");
-            if(!boxEmpty){
-                for(i = 0; i < 9; i++)
-                    box[i] = ' ';
-                boxEmpty = true;
-            }
-
-            if(winner == 1){
-                System.out.println("You won the game!\nCreated by Shreyas Saha. Thanks for playing!");
-                break;
-            } else if(winner == 2){
-                System.out.println("You lost the game!\nCreated by Shreyas Saha. Thanks for playing!");
-                break;
-            } else if(winner == 3){
-                System.out.println("It's a draw!\nCreated by Shreyas Saha. Thanks for playing!");
+            printBoard(board);
+            
+            if (winner != 0) {
+                printResult(winner);
                 break;
             }
 
-            while (true) {
-                input = scan.nextByte();
-                if (input > 0 && input < 10) {
-                    if (box[input - 1] == 'X' || box[input - 1] == 'O')
-                        System.out.println("That one is already in use. Enter another.");
-                    else {
-                        box[input - 1] = 'X';
-                        break;
-                    }
-                }
-                else
-                    System.out.println("Invalid input. Enter again.");
+            userMove = getUserMove(scan, board);
+            board[userMove - 1] = USER_MARK;
+
+            if (checkWinner(board, USER_MARK)) {
+                winner = 1;
+                continue;
             }
 
-            if((box[0]=='X' && box[1]=='X' && box[2]=='X') || (box[3]=='X' && box[4]=='X' && box[5]=='X') || (box[6]=='X' && box[7]=='X' && box[8]=='X') ||
-               (box[0]=='X' && box[3]=='X' && box[6]=='X') || (box[1]=='X' && box[4]=='X' && box[7]=='X') || (box[2]=='X' && box[5]=='X' && box[8]=='X') ||
-               (box[0]=='X' && box[4]=='X' && box[8]=='X') || (box[2]=='X' && box[4]=='X' && box[6]=='X')){
-                   winner = 1;
-                   continue;
-            }
-
-            boxAvailable = false;
-            for(i=0; i<9; i++){
-                if(box[i] != 'X' && box[i] != 'O'){
-                    boxAvailable = true;
-                    break;
-                }
-            }
-
-            if(boxAvailable == false){
+            if (isBoardFull(board)) {
                 winner = 3;
                 continue;
             }
 
-            while (true) {
-                rand = (byte) (Math.random() * (9 - 1 + 1) + 1);
-                if (box[rand - 1] != 'X' && box[rand - 1] != 'O') {
-                    box[rand - 1] = 'O';
-                    break;
-                }
-            }
+            computerMove = getComputerMove(board);
+            board[computerMove - 1] = COMPUTER_MARK;
 
-            if((box[0]=='O' && box[1]=='O' && box[2]=='O') || (box[3]=='O' && box[4]=='O' && box[5]=='O') || (box[6]=='O' && box[7]=='O' && box[8]=='O') ||
-               (box[0]=='O' && box[3]=='O' && box[6]=='O') || (box[1]=='O' && box[4]=='O' && box[7]=='O') || (box[2]=='O' && box[5]=='O' && box[8]=='O') ||
-               (box[0]=='O' && box[4]=='O' && box[8]=='O') || (box[2]=='O' && box[4]=='O' && box[6]=='O')){
+            if (checkWinner(board, COMPUTER_MARK)) {
                 winner = 2;
                 continue;
             }
         }
+    }
 
+    public static void printBoard(char[] board) {
+        System.out.println("\n\n " + board[0] + " | " + board[1] + " | " + board[2] + " ");
+        System.out.println("-----------");
+        System.out.println(" " + board[3] + " | " + board[4] + " | " + board[5] + " ");
+        System.out.println("-----------");
+        System.out.println(" " + board[6] + " | " + board[7] + " | " + board[8] + " \n");
+    }
+
+    public static void printResult(int winner) {
+        if (winner == 1) {
+            System.out.println("You won the game!");
+        } else if (winner == 2) {
+            System.out.println("You lost the game!");
+        } else {
+            System.out.println("It's a draw!");
+        }
+        System.out.println("Thanks for playing!");
+    }
+
+    public static byte getUserMove(Scanner scan, char[] board) {
+        byte move;
+        while (true) {
+            move = scan.nextByte();
+            if (move > 0 && move < 10 && board[move - 1] != USER_MARK && board[move - 1] != COMPUTER_MARK) {
+                break;
+            }
+            System.out.println("Invalid move. Enter again.");
+        }
+        return move;
+    }
+
+    public static byte getComputerMove(char[] board) {
+        byte move;
+        while (true) {
+            move = (byte) (Math.random() * TOTAL_CELLS + 1);
+            if (board[move - 1] != USER_MARK && board[move - 1] != COMPUTER_MARK) {
+                break;
+            }
+        }
+        return move;
+    }
+
+    public static boolean checkWinner(char[] board, char mark) {
+        return (board[0] == mark && board[1] == mark && board[2] == mark) ||
+               (board[3] == mark && board[4] == mark && board[5] == mark) ||
+               (board[6] == mark && board[7] == mark && board[8] == mark) ||
+               (board[0] == mark && board[3] == mark && board[6] == mark) ||
+               (board[1] == mark && board[4] == mark && board[7] == mark) ||
+               (board[2] == mark && board[5] == mark && board[8] == mark) ||
+               (board[0] == mark && board[4] == mark && board[8] == mark) ||
+               (board[2] == mark && board[4] == mark && board[6] == mark);
+    }
+
+    public static boolean isBoardFull(char[] board) {
+        for (char cell : board) {
+            if (cell != USER_MARK && cell != COMPUTER_MARK) {
+                return false;
+            }
+        }
+        return true;
     }
 }
