@@ -1,90 +1,138 @@
 import java.util.Scanner;
+import java.util.Random;
 
-public class App {
+class Board {
+    private char[] cells = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
-    public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        byte input;
-        byte rand;
-        byte i;
-        boolean boxAvailable = false;
-        byte winner = 0;
-        char box[] = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-        System.out.println("Enter box number to select. Enjoy!\n");
+    public void display() {
+        System.out.println("\n\n " + cells[0] + " | " + cells[1] + " | " + cells[2]);
+        System.out.println("-----------");
+        System.out.println(" " + cells[3] + " | " + cells[4] + " | " + cells[5]);
+        System.out.println("-----------");
+        System.out.println(" " + cells[6] + " | " + cells[7] + " | " + cells[8] + "\n");
+    }
 
-        boolean boxEmpty = false;
-        while (true) {
-            System.out.println("\n\n " + box[0] + " | " + box[1] + " | " + box[2] + " ");
-            System.out.println("-----------");
-            System.out.println(" " + box[3] + " | " + box[4] + " | " + box[5] + " ");
-            System.out.println("-----------");
-            System.out.println(" " + box[6] + " | " + box[7] + " | " + box[8] + " \n");
-            if(!boxEmpty){
-                for(i = 0; i < 9; i++)
-                    box[i] = ' ';
-                boxEmpty = true;
-            }
+    public boolean makeMove(int position, char symbol) {
+        if (position < 1 || position > 9 || cells[position - 1] == 'X' || cells[position - 1] == 'O') {
+            return false;
+        }
+        cells[position - 1] = symbol;
+        return true;
+    }
 
-            if(winner == 1){
-                System.out.println("You won the game!\nCreated by Shreyas Saha. Thanks for playing!");
-                break;
-            } else if(winner == 2){
-                System.out.println("You lost the game!\nCreated by Shreyas Saha. Thanks for playing!");
-                break;
-            } else if(winner == 3){
-                System.out.println("It's a draw!\nCreated by Shreyas Saha. Thanks for playing!");
-                break;
-            }
-
-            while (true) {
-                input = scan.nextByte();
-                if (input > 0 && input < 10) {
-                    if (box[input - 1] == 'X' || box[input - 1] == 'O')
-                        System.out.println("That one is already in use. Enter another.");
-                    else {
-                        box[input - 1] = 'X';
-                        break;
-                    }
-                }
-                else
-                    System.out.println("Invalid input. Enter again.");
-            }
-
-            if((box[0]=='X' && box[1]=='X' && box[2]=='X') || (box[3]=='X' && box[4]=='X' && box[5]=='X') || (box[6]=='X' && box[7]=='X' && box[8]=='X') ||
-               (box[0]=='X' && box[3]=='X' && box[6]=='X') || (box[1]=='X' && box[4]=='X' && box[7]=='X') || (box[2]=='X' && box[5]=='X' && box[8]=='X') ||
-               (box[0]=='X' && box[4]=='X' && box[8]=='X') || (box[2]=='X' && box[4]=='X' && box[6]=='X')){
-                   winner = 1;
-                   continue;
-            }
-
-            boxAvailable = false;
-            for(i=0; i<9; i++){
-                if(box[i] != 'X' && box[i] != 'O'){
-                    boxAvailable = true;
-                    break;
-                }
-            }
-
-            if(boxAvailable == false){
-                winner = 3;
-                continue;
-            }
-
-            while (true) {
-                rand = (byte) (Math.random() * (9 - 1 + 1) + 1);
-                if (box[rand - 1] != 'X' && box[rand - 1] != 'O') {
-                    box[rand - 1] = 'O';
-                    break;
-                }
-            }
-
-            if((box[0]=='O' && box[1]=='O' && box[2]=='O') || (box[3]=='O' && box[4]=='O' && box[5]=='O') || (box[6]=='O' && box[7]=='O' && box[8]=='O') ||
-               (box[0]=='O' && box[3]=='O' && box[6]=='O') || (box[1]=='O' && box[4]=='O' && box[7]=='O') || (box[2]=='O' && box[5]=='O' && box[8]=='O') ||
-               (box[0]=='O' && box[4]=='O' && box[8]=='O') || (box[2]=='O' && box[4]=='O' && box[6]=='O')){
-                winner = 2;
-                continue;
+    public boolean isFull() {
+        for (char cell : cells) {
+            if (cell != 'X' && cell != 'O') {
+                return false;
             }
         }
+        return true;
+    }
 
+    public boolean checkWin(char symbol) {
+        return (cells[0] == symbol && cells[1] == symbol && cells[2] == symbol) ||
+               (cells[3] == symbol && cells[4] == symbol && cells[5] == symbol) ||
+               (cells[6] == symbol && cells[7] == symbol && cells[8] == symbol) ||
+               (cells[0] == symbol && cells[3] == symbol && cells[6] == symbol) ||
+               (cells[1] == symbol && cells[4] == symbol && cells[7] == symbol) ||
+               (cells[2] == symbol && cells[5] == symbol && cells[8] == symbol) ||
+               (cells[0] == symbol && cells[4] == symbol && cells[8] == symbol) ||
+               (cells[2] == symbol && cells[4] == symbol && cells[6] == symbol);
+    }
+}
+
+class Player {
+    private char symbol;
+
+    public Player(char symbol) {
+        this.symbol = symbol;
+    }
+
+    public char getSymbol() {
+        return symbol;
+    }
+
+    public int getMove(Scanner scanner) {
+        System.out.println("Enter your move (1-9):");
+        return scanner.nextInt();
+    }
+}
+
+class ComputerPlayer extends Player {
+    private Random random = new Random();
+
+    public ComputerPlayer(char symbol) {
+        super(symbol);
+    }
+
+    public int getMove() {
+        return random.nextInt(9) + 1;
+    }
+}
+
+class Game {
+    private Board board;
+    private Player player;
+    private ComputerPlayer computer;
+
+    public Game() {
+        board = new Board();
+        player = new Player('X');
+        computer = new ComputerPlayer('O');
+    }
+
+    public void start() {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            board.display();
+
+            // Player move
+            boolean validMove;
+            do {
+                int playerMove = player.getMove(scanner);
+                validMove = board.makeMove(playerMove, player.getSymbol());
+                if (!validMove) {
+                    System.out.println("Invalid move. Try again.");
+                }
+            } while (!validMove);
+
+            if (board.checkWin(player.getSymbol())) {
+                board.display();
+                System.out.println("You won!");
+                break;
+            }
+
+            if (board.isFull()) {
+                board.display();
+                System.out.println("It's a draw!");
+                break;
+            }
+
+            // Computer move
+            do {
+                int computerMove = computer.getMove();
+                validMove = board.makeMove(computerMove, computer.getSymbol());
+            } while (!validMove);
+
+            if (board.checkWin(computer.getSymbol())) {
+                board.display();
+                System.out.println("You lost!");
+                break;
+            }
+
+            if (board.isFull()) {
+                board.display();
+                System.out.println("It's a draw!");
+                break;
+            }
+        }
+        scanner.close();
+    }
+}
+
+public class App {
+    public static void main(String[] args) {
+        Game game = new Game();
+        game.start();
     }
 }
